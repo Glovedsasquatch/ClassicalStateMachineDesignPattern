@@ -13,23 +13,28 @@ struct ModuleProgressReport {
     std::unique_ptr<State> m_module_state;
     std::uint32_t m_steps_counter;
 
-    explicit ModuleProgressReport() : m_module_state(std::make_unique<Unregistered>()) , m_steps_counter(0) {}
+    explicit ModuleProgressReport()
+        : m_module_state(std::make_unique<Unregistered>())
+        , m_steps_counter(0) {}
 
-    void module_in_progress (const Events event) {
-        if (m_module_state->is_module_complete == false) {
-            std::cout << "Step #" << ++m_steps_counter << ". ";
-            if (auto new_module_state = m_module_state->process_event(event); new_module_state) {
-                m_module_state = std::move(new_module_state);
+    void begin_module_activity() {
+        while (State::num_registrations < m_module_state->m_MAX_REGISTRATIONS) {
+            if (!m_module_state->is_module_complete) {
+                if (auto new_module_state = m_module_state->perform_state_activity(); new_module_state)
+                    m_module_state = std::move(new_module_state);
+            }
+            else {
+                std::cout << "Module completed. No further action needed!" << std::endl;
+                return;
             }
         }
-        else {
-            std::cout << "Module completed. No further action needed." << std::endl;
-        }
-    }
 
-    template<typename... Events>
-    void progress_module(Events... event) {
-        { (module_in_progress(event), ...); }
+        // This code handles the state where re-registration is not possible and the module is incomplete
+        if (!m_module_state->is_module_complete && State::num_registrations == m_module_state->m_MAX_REGISTRATIONS) {
+            std::cout   << "You cannot re-register to this module more than "
+                        << m_module_state->m_MAX_REGISTRATIONS << " times.\n"
+                        << "Sorry, you have failed the module with no possibility for re-registration!" << std::endl;
+        }
     }
 };
 

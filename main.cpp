@@ -3,20 +3,7 @@
 int main(int argc, char** argv) {
     ModuleProgressReport progress_report;
 
-    progress_report.progress_module(
-        WriteExam,
-        Register,
-        WriteExam,
-        Prepare,
-        Prepare,
-        WriteExam,
-        ResultFail,
-        Prepare,
-        WriteExam,
-        ResultPass,
-        Prepare,
-        ResultFail
-    );
+    progress_report.begin_module_activity();
 
     return EXIT_SUCCESS;
 }

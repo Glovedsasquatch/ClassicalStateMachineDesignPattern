@@ -6,58 +6,53 @@
 # include "States/States.h"
 # include "Events/Events.h"
 
-std::unique_ptr<State> Unregistered::process_event(const Events event) {
+std::uint32_t State::num_registrations = 0;
+
+void Unregistered::process_event(const Events event) {
     if (event == Register) {
-        std::cout << "Want to register? -> " << event << std::endl;
-        return std::make_unique<Registered>();
-    }
-    else if (event == WriteExam) {
-        std::cout << "You are still unregistered! Sorry, you cannot take the exam!" << std::endl;
-        return nullptr;
+        std::cout << "\tRegistration under process -> " << event << std::endl;
+        m_next_state = std::make_unique<Registered>();
+        return;
     }
 
-    std::cout << "You are still unregistered! " << std::endl;
-    return nullptr;
+    std::cout << "\tModule still unregistered!" << std::endl;
+    m_next_state = std::make_unique<Unregistered>();
 }
 
-std::unique_ptr<State> Registered::process_event(const Events event) {
+void Registered::process_event(const Events event) {
     if (event == Prepare) {
         std::cout << "Ready to take up lectures? -> " << event << std::endl;
-        return std::make_unique<Preparation>();
-    }
-    if (event == WriteExam) {
-        std::cout << "You are registered but not prepared. Sorry, you cannot take the exam!" << std::endl;
-        return nullptr;
+        m_next_state = std::make_unique<Preparation>();
+        return;
     }
 
-    std::cout << "You are registered but not preparing! Everything okay?" << std::endl;
-    return nullptr;
+    std::cout << "Registered but not preparing! " << std::endl;
+    m_next_state = std::make_unique<Registered>();
 }
 
-std::unique_ptr<State> Preparation::process_event(const Events event) {
+void Preparation::process_event(const Events event) {
     if (event == WriteExam) {
         std::cout << "Done with preparations! -> " << event << std::endl;
-        return std::make_unique<Examination>();
+        m_next_state = std::make_unique<Examination>();
+        return;
     }
 
-    std::cout << "Still preparing? -> " << event << std::endl;
-    return nullptr;
+    std::cout << "Need more preparation ... Not writing exams! " << std::endl;
+    m_next_state = std::make_unique<Preparation>();
 }
 
-std::unique_ptr<State> Examination::process_event(const Events event) {
+void Examination::process_event(const Events event) {
     if (event == ResultFail) {
         std::cout << "Awaiting results? Final results out -> " << event << std::endl;
-        return std::make_unique<Registered>();
+        m_next_state = std::make_unique<Registered>();
+        return;
     }
     else if (event == ResultPass) {
         std::cout << "Awaiting results? Final results out -> " << event << std::endl;
-        return std::make_unique<ModuleCompleted>();
+        m_next_state = std::make_unique<ModuleCompleted>();
     }
-
-    std::cout << "Examinations still under progress! " << std::endl;
-    return nullptr;
 }
 
-std::unique_ptr<State> ModuleCompleted::process_event(const Events event) {
-    return std::make_unique<ModuleCompleted>();
+void ModuleCompleted::process_event(const Events event) {
+    m_next_state = std::make_unique<ModuleCompleted>();
 }
