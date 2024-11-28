@@ -1,0 +1,14 @@
+{
+  "ModuleParams" : {
+    "max_permissible_registration" : 3,
+    "max_module_lecture_per_preparation" : 10,
+    "min_attendance_percentage_to_attend_exam" : 75,
+    "min_questions_per_examination" : 10,
+    "max_examination_questions" : 20,
+    "min_pass_percentage" : 50
+  },
+  "StudentPerformanceStats" : {
+    "probability_a_lecture_is_attended" : 0.8,
+    "probability_in_favor_of_correct_response" : 0.6
+  }
+}
