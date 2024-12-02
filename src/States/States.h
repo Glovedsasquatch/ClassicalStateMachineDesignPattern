@@ -40,7 +40,7 @@ struct Unregistered final : State {
   void process_event(Events event) override;
 
   std::unique_ptr<State> perform_state_activity() override {
-    if (State::num_registrations < m_MAX_REGISTRATIONS) {
+    if (State::num_registrations <= m_MAX_REGISTRATIONS) {
       std::cout << "Proceeding to registration work ..." << std::endl;
       process_event(Register);
       return std::move(m_next_state);

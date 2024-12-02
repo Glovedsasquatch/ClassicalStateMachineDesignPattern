@@ -18,7 +18,7 @@ struct ModuleProgressReport {
         , m_steps_counter(0) {}
 
     void begin_module_activity() {
-        while (State::num_registrations < m_module_state->m_MAX_REGISTRATIONS) {
+        while (State::num_registrations <= m_module_state->m_MAX_REGISTRATIONS) {
             if (!m_module_state->is_module_complete) {
                 if (auto new_module_state = m_module_state->perform_state_activity(); new_module_state)
                     m_module_state = std::move(new_module_state);
@@ -30,7 +30,7 @@ struct ModuleProgressReport {
         }
 
         // This code handles the state where re-registration is not possible and the module is incomplete
-        if (!m_module_state->is_module_complete && State::num_registrations == m_module_state->m_MAX_REGISTRATIONS) {
+        if (!m_module_state->is_module_complete && State::num_registrations > m_module_state->m_MAX_REGISTRATIONS) {
             std::cout   << "You cannot re-register to this module more than "
                         << m_module_state->m_MAX_REGISTRATIONS << " times.\n"
                         << "Sorry, you have failed the module with no possibility for re-registration!" << std::endl;
