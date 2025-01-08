@@ -8,17 +8,21 @@
 #include <iostream>
 
 #include "States.h"
+#include "Config.h"
 
 struct ModuleProgressReport {
+    Config m_config;
     std::unique_ptr<State> m_module_state;
     std::uint32_t m_steps_counter;
 
-    explicit ModuleProgressReport()
-        : m_module_state(std::make_unique<Unregistered>())
+    explicit ModuleProgressReport(const Config& config)
+        : m_config(config)
+        , m_module_state(std::make_unique<Unregistered>(config.getModuleParameters(), config.getStudentPerformanceStats()))
         , m_steps_counter(0) {}
 
     void begin_module_activity() {
-        while (State::num_registrations <= m_module_state->m_MAX_REGISTRATIONS) {
+        const auto module_params = m_config.getModuleParameters();
+        while (State::num_registrations <= module_params.max_module_registrations.value()) {
             if (!m_module_state->is_module_complete) {
                 if (auto new_module_state = m_module_state->perform_state_activity(); new_module_state)
                     m_module_state = std::move(new_module_state);
@@ -30,9 +34,10 @@ struct ModuleProgressReport {
         }
 
         // This code handles the state where re-registration is not possible and the module is incomplete
-        if (!m_module_state->is_module_complete && State::num_registrations > m_module_state->m_MAX_REGISTRATIONS) {
+        if (!m_module_state->is_module_complete
+                && State::num_registrations > module_params.max_module_registrations.value()) {
             std::cout   << "You cannot re-register to this module more than "
-                        << m_module_state->m_MAX_REGISTRATIONS << " times.\n"
+                        << module_params.max_module_registrations.value() << " times.\n"
                         << "Sorry, you have failed the module with no possibility for re-registration!" << std::endl;
         }
     }
